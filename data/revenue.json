@@ -1,18 +1,18 @@
 [{
         "name": "State funding",
-        "budget": 1355000000,
+        "revenue": 1355000000,
         "ID": "statefunding"
     }, {
         "name": "Local Tax & Non Tax",
-        "budget": 962000000,
+        "revenue": 962000000,
         "ID": "tax"
     }, {
         "name": "Use of Reserves",
-        "budget": 61000000,
+        "revenue": 61000000,
         "ID": "reserves"
     }, {
         "name": "Deficit Financing",
-        "budget": 27000000,
+        "revenue": 27000000,
         "ID": "deficitfinancing"
     }
 
