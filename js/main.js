@@ -1,108 +1,137 @@
+// this is called an "immediate" function, and it allows us to 
+// encapulate all of our variables inside this JS file without
+// polluting the global namespace. Super handy and used a lot. :)
+// looks like this: (function(){})();
 
-    var WIDTH = 600, HEIGHT = 450;
+// this function runs right away unlike the typical named functions.
+(function() {
 
-    var name = "name";
-    var data = "revenue";
+  // now that things aren't polluting the global, 
+  // we can make everything in here lowercase variables
 
-    var w = WIDTH,
-        h = HEIGHT, 
-        r = Math.min(w, h) / 3;
+  // todo: make these lowercase variables
+  var COLOR_1 = "#98abc5";
+  var COLOR_2 = "#8a89a6";
+  var COLOR_3 = "#7b6888";
+  var COLOR_4 = "#6b486b";
+  var COLOR_5 = "#a05d56";
 
-    var COLOR_1 = "#98abc5";
-    var COLOR_2 = "#8a89a6";
-    var COLOR_3 = "#7b6888";
-    var COLOR_4 = "#6b486b";
-    var COLOR_5 = "#a05d56";
+  var color = d3.scale.ordinal()
+    .range([COLOR_1, COLOR_2, COLOR_3,
+      COLOR_4, COLOR_5
+    ]);
 
-    var color = d3.scale.ordinal()
-        .range([COLOR_1, COLOR_2, COLOR_3,
-                COLOR_4, COLOR_5]);
 
-    data = [{"name": "State funding", "revenue": 1355000000}, 
-            {"name": "Local Tax & Non Tax", "revenue": 962000000}, 
-            {"name": "Use of Reserves", "revenue": 61000000}, 
-            {"name": "Deficit Financing", "revenue": 27000000}];
+  // AJAX REQUEST
+  // This starts the rendering of the pie chart once we have the data in hand.
+  $.getJSON('/data/revenue.json', function(data) {
+    // call the function to render the pie chart with the known data
+    drawD3Document(data);
+  });
+
+  // this is the guts of our rendering - but this won't be run unless we call it.
+  function drawD3Document(data) {
+
+    // just moved these down here for tidiness, not required
+    var width = 600,
+        height = 450,
+        r = Math.min(width, height) / 3;
 
     var arc = d3.svg.arc()
-        .innerRadius(0)
-        .outerRadius(r - 10);
+        .outerRadius(r);
 
     var pie = d3.layout.pie()
-        .sort(null)
-        .value(function(d) { return d[data]; });
+      .sort(null)
+      .value(function(d) {
+        // note: d[name] looks for a variable called "name" 
+        // instead of the desired name attribute inside our data object
+        // (and why you likely created two variables at the top, but that borked other stuff)
+        // you could however use d["name"] and that would work OK.
+        return d.revenue; // or d["revenue"]
+      });
 
 
     var svg = d3.select("#container")
-        .append("svg") //create the SVG element inside the <body>
-        .data([data]) //associate our data with the document
-        .attr("width", w)
-        .attr("height", h)
-        .append("g")
-        .attr("transform", "translate(" + w / 3 + "," + h / 2 + ")");
+      .append("svg") //create the SVG element inside the <body>
+      .data([data]) //associate our data with the document
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(" + width / 3 + "," + height / 2 + ")");
 
-    var drawD3Document = function(data) {
-        data.forEach(function(d) {
-            d[data] = +d[data];
-    });
-    var g = svg.selectAll(".arc")
-    	    .data(pie(data))
-    	    .enter()
-    		.append("g")
-    		.attr("class", "arc");
+    // not sure what this guy is doing so commenting out for now.
+    // data.forEach(function(d) {
+    //   d[data] = +d[data];
+    // });
+
+    // var g = svg.selectAll(".arc")
+    //   .data(pie(data))
+    //   .enter()
+    //   .append("g")
+    //   .attr("class", "arc");
+
+    var arcs = svg.selectAll("g.slice") 
+      .data(pie) 
+      .enter() 
+      .append("svg:g") 
+      .attr("class", "slice");
+
 
     var count = 0;
 
-    	g.append("path")
-            .attr("d", arc)
-    		.attr("id", function(d) { return "arc-" + (count++); })
-            .style("fill", function(d) {
-                return color(d.data[name]);
-            });
+    arcs.append("svg:path")
+      .attr("d", arc)
+      .attr("id", function(d) {
+        return "arc-" + (count++);
+      })
+      .attr("fill", function(d, i) {
+        // we use the index number here to reference a corresponding
+        // color within the colors object.
+        return color(i);
+      });
 
-        g.append("text")
-            .attr("transform", function(d) {
-                return "translate(" + arc.centroid(d) + ")";
-            })
-            .attr("dy", ".35em").style("text-anchor", "middle")
-            .text(function(d) {
-                return d.data[name];
-            });
+    // commenting out for now, let's work on this tonight.
+    // g.append("text")
+    //   .attr("transform", function(d) {
+    //     return "translate(" + arc.centroid(d) + ")";
+    //   })
+    //   .attr("dy", ".35em").style("text-anchor", "middle")
+    //   .text(function(d) {
+    //     // this refers to the revenue object's name 
+    //     return d.name;
+    //   });
 
-        count = 0;
-        var legend = svg.selectAll(".legend")
-            .data(data).enter()
-            .append("g").attr("class", "legend")
-            .attr("legend-id", function(d) {
-                return count++;
-            })
-            .attr("transform", function(d, i) {
-                return "translate(-60," + (-70 + i * 20) + ")";
-            })
-            .on("click", function() {
-                  console.log("#arc-" + $(this).attr("legend-id"));
-                  var arc = d3.select("#arc-" + $(this).attr("legend-id"));
-                  arc.style("opacity", 0.3);
-                  setTimeout(function() {
-                      arc.style("opacity", 1);
-                  }, 1000);
-        });
+    // count = 0;
+    // var legend = svg.selectAll(".legend")
+    //   .data(data).enter()
+    //   .append("g").attr("class", "legend")
+    //   .attr("legend-id", function(d) {
+    //     return count++;
+    //   })
+    //   .attr("transform", function(d, i) {
+    //     return "translate(-60," + (-70 + i * 20) + ")";
+    //   })
+    //   .on("click", function() {
+    //     console.log("#arc-" + $(this).attr("legend-id"));
+    //     var arc = d3.select("#arc-" + $(this).attr("legend-id"));
+    //     arc.style("opacity", 0.3);
+    //     setTimeout(function() {
+    //       arc.style("opacity", 1);
+    //     }, 1000);
+    //   });
 
-    legend.append("rect")
-        .attr("x", w / 2)
-        .attr("width", 18).attr("height", 18)
-        .style("fill", function(d) {
-            return color(d[name]);
-        });
-    legend.append("text").attr("x", w / 2)
-        .attr("y", 9).attr("dy", ".32em")
-        .style("text-anchor", "end").text(function(d) {
-          return d[name];
-        });  
+    // legend.append("rect")
+    //   .attr("x", w / 2)
+    //   .attr("width", 18).attr("height", 18)
+    //   .style("fill", function(d, i) {
+    //     return color(i);
+    //   });
+    // legend.append("text").attr("x", w / 2)
+    //   .attr("y", 9).attr("dy", ".32em")
+    //   .style("text-anchor", "end").text(function(d) {
+    //     return d.name;
+    //   });
 
-};
-
-
-
-
-
-
+  }
+  // end of our immediate function
+})();
