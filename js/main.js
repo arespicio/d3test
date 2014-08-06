@@ -1,6 +1,3 @@
-$.getJSON("/data/revenue.json") 
-    .done(function(data) {
-    // console.log(data);
 
     var WIDTH = 600, HEIGHT = 450;
 
@@ -20,6 +17,11 @@ $.getJSON("/data/revenue.json")
     var color = d3.scale.ordinal()
         .range([COLOR_1, COLOR_2, COLOR_3,
                 COLOR_4, COLOR_5]);
+
+    data = [{"name": "State funding", "revenue": 1355000000}, 
+            {"name": "Local Tax & Non Tax", "revenue": 962000000}, 
+            {"name": "Use of Reserves", "revenue": 61000000}, 
+            {"name": "Deficit Financing", "revenue": 27000000}];
 
     var arc = d3.svg.arc()
         .innerRadius(0)
@@ -100,10 +102,6 @@ $.getJSON("/data/revenue.json")
 };
 
 
-//create function that adds key value pair of color and name from data
-//color(i) 
-//make loop that goes through each data item 
-//inside sidebar create html element with text of name of data and color from color(i)
 
 
 
