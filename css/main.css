@@ -9,7 +9,42 @@ h1,h2,h3,h4,h5{
 }
 
 
+#container{
+	margin: 0 auto;
+	max-width: 800px;
+}
 
-#sidebar{
+#chart, #key{
+	float: left;
+	min-height: 200px;
+	min-width: 200px;
+}
 
+#chart{
+	/*background-color: red;*/
+}
+
+#key{
+	/*background-color: blue;*/
+	margin-top: 120px;
+}
+
+.key-item {
+	padding: 10px;
+	margin-left: 30px;
+	color: #fff;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.key-item,
+.item-value,
+.name,
+.revenue {
+  -webkit-transition: all 0.3s ease-out;
+  		  transition: all 0.3s ease-out;
+}
+
+.hidden {
+	display: none;
 }

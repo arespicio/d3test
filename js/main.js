@@ -27,15 +27,17 @@
   $.getJSON('/data/revenue.json', function(data) {
     // call the function to render the pie chart with the known data
     drawD3Document(data);
+    makelabels(data);
+    bindEvents();
   });
 
   // this is the guts of our rendering - but this won't be run unless we call it.
   function drawD3Document(data) {
 
     // just moved these down here for tidiness, not required
-    var width = 600,
+    var width = 400,
         height = 450,
-        r = Math.min(width, height) / 3;
+        r = Math.min(width, height) / 2;
 
     var arc = d3.svg.arc()
         .outerRadius(r);
@@ -51,13 +53,13 @@
       });
 
 
-    var svg = d3.select("#container")
+    var svg = d3.select("#chart")
       .append("svg") //create the SVG element inside the <body>
       .data([data]) //associate our data with the document
       .attr("width", width)
       .attr("height", height)
       .append("g")
-      .attr("transform", "translate(" + width / 3 + "," + height / 2 + ")");
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
     // not sure what this guy is doing so commenting out for now.
     // data.forEach(function(d) {
@@ -88,8 +90,54 @@
         // we use the index number here to reference a corresponding
         // color within the colors object.
         return color(i);
+      })
+      .attr("class", "item-value")
+      .attr("data-id", function(d, i){
+        return i;
       });
 
+}
+
+function makelabels(data) {
+    var $target = $('#key');
+
+    $.each(data, function(index, item) {
+      var $div = $('<div />');
+
+      $div.html('<span class="name">' + item.name + '</span>' +
+         '<span class="revenue hidden">' + numeral(item.revenue).format('$0,0') + '</span>');
+      $div.addClass('key-item')
+        .css('backgroundColor', color(index))
+        .attr('data-id', index);
+      $target.append($div);
+      // debugger
+
+    })
+}
+
+function bindEvents() {
+    $('.item-value, .key-item')
+      .mouseover(function() {
+        var id = $(this).data('id');
+
+        var $key = $('.key-item[data-id="' + id + '"]');
+        $key.find('.name').addClass('hidden');
+        $key.find('.revenue').removeClass('hidden');
+
+        var $value = $('.item-value[data-id="' + id + '"]');
+        $value.css('opacity', 0.5);
+    })
+    .mouseout(function() {
+      var id = $(this).data('id');
+
+        var $key = $('.key-item[data-id="' + id + '"]');
+        $key.find('.name').removeClass('hidden');
+        $key.find('.revenue').addClass('hidden');
+
+        var $value = $('.item-value[data-id="' + id + '"]');
+        $value.css('opacity', 1);
+    });
+}
     // commenting out for now, let's work on this tonight.
     // g.append("text")
     //   .attr("transform", function(d) {
@@ -132,6 +180,6 @@
     //     return d.name;
     //   });
 
-  }
+  
   // end of our immediate function
 })();
